@@ -13,6 +13,15 @@ export declare class Api {
      */
     sendMessage(structsText: Send[keyof Send][] | string, id: number, isGroup?: boolean): Promise<number>;
     /**
+     * 快速回复消息（自动判断群组和私聊）
+     * @param message 要回复的消息
+     * @param structsText 回复的文本
+     * @param [at=false] 是否艾特回复对象
+     * @param [reply=false] 是否引用要回复的消息
+     * @return {Promise<number>} 返回本条发送的消息的id
+     */
+    replyMessage(message: Message, structsText: Send[keyof Send][] | string, at?: boolean, reply?: boolean): Promise<number>;
+    /**
      * 通过消息id获取消息内容
      * @param id 消息id
      */
