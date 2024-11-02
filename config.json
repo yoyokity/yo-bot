@@ -1,0 +1,13 @@
+{
+  "botName": null,
+  "master": null,
+  "host": null,
+  "port": null,
+  "debug": null,
+  "prefix": null,
+  "group": null,
+  "groupBlacklist": null,
+  "userBlacklist": null,
+  "canPrivate": null,
+  "canTemporary": null
+}

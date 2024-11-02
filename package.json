@@ -1,0 +1,22 @@
+{
+  "name": "yo-bot",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "run": "node dist/index.js",
+    "dev": "npm run build && node dist/index.js"
+  },
+  "dependencies": {
+    "got": "^14.4.3",
+    "node-napcat-ts": "^0.3.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.8.6",
+    "typescript": "^5.5.3"
+  },
+  "private": true
+}

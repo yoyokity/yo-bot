@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist", //指定输出文件夹
+    "target": "ESNext",
+    "module": "NodeNext",
+    "declaration": true, //让tsc自动生成对用的.d.ts文件。
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "moduleResolution": "NodeNext",
+    "allowImportingTsExtensions": false,
+    "noEmit": false,
+    "sourceMap": true
+  },
+  "include": [
+    "src"
+  ]
+}
