@@ -136,7 +136,6 @@ export class Bot {
         if (!pluginPath.isExist) return
 
         helper.logging.info('正在加载插件...')
-        const indexFiles: any[] = []
         // 读取目录中的所有文件和子目录
         const items = fs.readdirSync(pluginPath.str)
 
@@ -149,13 +148,14 @@ export class Bot {
                 // 检查package.json文件
                 if (!packagePath.isExist) return
                 const packageJson = helper.json.read(packagePath.str)
+                if (!packageJson.enable) return
 
                 // 获取index文件路径
                 const indexPath = itemPath.join(packageJson.main)
                 if (!indexPath.isExist) return
 
                 //安装依赖
-                if ('dependencies' in packageJson){
+                if ('dependencies' in packageJson) {
                     helper.logging.info(`正在安装依赖:${itemPath.str}`)
                     const execAsync = promisify(exec)
                     try {

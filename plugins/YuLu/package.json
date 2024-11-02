@@ -3,5 +3,6 @@
   "main": "index.js",
   "dependencies": {
     "canvas": "^2.11.2"
-  }
+  },
+  "enable": true
 }

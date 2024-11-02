@@ -8,7 +8,11 @@ declare global {
 
 global.helper = new Helper(process.cwd())
 
-const config = helper.json.read(helper.path.appDir.join('config.json').str)
+let config = helper.json.read(helper.path.appDir.join('config.json').str)
+config = Object.fromEntries(
+    Object.entries(config).filter(([key, value]) => value !== null)
+)
+
 global.bot = new Bot(config)
 bot.connect()
 
