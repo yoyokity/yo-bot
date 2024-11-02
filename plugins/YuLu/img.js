@@ -94,7 +94,11 @@ async function parseYulu (ctx, maxWidth, yulu, groupId, bot) {
     }
 
     let newText = ['']
-    for (const char of text) {
+    for (const char of text.trim()) {
+        if (char === '\n') {
+            newText.push('')
+            continue
+        }
         let lineCount = newText.length - 1
         newText[lineCount] += char
         const metrics = ctx.measureText(newText[lineCount])

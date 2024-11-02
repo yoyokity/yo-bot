@@ -75,7 +75,7 @@ bot.addPlugin({
             }
             data.push({ replyId: message.replyId, qqId, yulu })
 
-            if (helper.json.write(jsonPath, data)) {
+            if (helper.json.write(jsonPath, data,false)) {
                 let headImg = await bot.Api.getHeadImage(qqId)
                 let a = await bot.Api.getGroupMemberInfo(message.groupId, qqId)
                 let nickName = a.card || a.nickname
