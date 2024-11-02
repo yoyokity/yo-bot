@@ -1,9 +1,10 @@
 import { NCWebsocket } from 'node-napcat-ts';
 import type { PluginInterface } from './interface.js';
+import { Api } from './ApiType.js';
 export declare class Bot {
     readonly instance: NCWebsocket;
     /** OneBot Api */
-    readonly Api: any;
+    readonly Api: Api;
     private readonly _debug;
     private readonly _host;
     private readonly _port;

@@ -13,26 +13,43 @@ export class Api {
      * @return {Promise<number>} 返回本条发送的消息的id
      */
     async sendMessage(structsText, id, isGroup = true) {
-        const config = isGroup
-            ? { group_id: id, message: structsText }
-            : { user_id: id, message: structsText };
-        const re = await this._instance.send_msg(config);
-        return re['message_id'];
+        try {
+            const config = isGroup
+                ? { group_id: id, message: structsText }
+                : { user_id: id, message: structsText };
+            const re = await this._instance.send_msg(config);
+            return re['message_id'];
+        }
+        catch (e) {
+            helper.logging.error('sendMessage 失败：', e);
+            return -1;
+        }
     }
     /**
      * 通过消息id获取消息内容
      * @param id 消息id
      */
     async getMessage(id) {
-        const re = await this._instance.get_msg({ message_id: id });
-        return new Message(re);
+        try {
+            const re = await this._instance.get_msg({ message_id: id });
+            return new Message(re);
+        }
+        catch (e) {
+            helper.logging.error('getMessage 失败：', e);
+            return null;
+        }
     }
     /**
      * 撤回消息
      * @param {number} id 消息id
      */
     async deleteMessage(id) {
-        await this._instance.delete_msg({ message_id: id });
+        try {
+            await this._instance.delete_msg({ message_id: id });
+        }
+        catch (e) {
+            helper.logging.error('deleteMessage 失败：', e);
+        }
     }
     /**
      * 通过QQ号获取头像
@@ -58,67 +75,123 @@ export class Api {
      * @param memberId 群成员QQ号
      */
     async getGroupMemberInfo(groupId, memberId) {
-        return await this._instance.get_group_member_info({
-            group_id: groupId,
-            user_id: memberId,
-        });
+        try {
+            return await this._instance.get_group_member_info({
+                group_id: groupId,
+                user_id: memberId,
+            });
+        }
+        catch (e) {
+            helper.logging.error('getGroupMemberInfo 失败：', e);
+            return null;
+        }
     }
     /**
      * 获取机器人QQ信息
      */
     async getBotInfo() {
-        return await this._instance.get_login_info();
+        try {
+            return await this._instance.get_login_info();
+        }
+        catch (e) {
+            helper.logging.error('getBotInfo 失败：', e);
+            return null;
+        }
     }
     /**
      * 获取机器人在群组中是否有管理员权限
      * @param groupId 群号
      */
     async getBotAdminInfo(groupId) {
-        const re = await this.getBotInfo();
-        const memberInfo = await this.getGroupMemberInfo(groupId, re.user_id);
-        return memberInfo.role === 'admin';
+        try {
+            const re = await this.getBotInfo();
+            if (!re)
+                return false;
+            const memberInfo = await this.getGroupMemberInfo(groupId, re.user_id);
+            return memberInfo?.role === 'admin';
+        }
+        catch (e) {
+            helper.logging.error('getBotAdminInfo 失败：', e);
+            return false;
+        }
     }
     /**
      * 获取某个QQ号的信息
      * @param id QQ号
      */
     async getQQInfo(id) {
-        return await this._instance.get_stranger_info({ user_id: id });
+        try {
+            return await this._instance.get_stranger_info({ user_id: id });
+        }
+        catch (e) {
+            helper.logging.error('getQQInfo 失败：', e);
+            return null;
+        }
     }
     /**
      * 获取群信息
      * @param id 群号
      */
     async getGroupInfo(id) {
-        return await this._instance.get_group_info({ group_id: id });
+        try {
+            return await this._instance.get_group_info({ group_id: id });
+        }
+        catch (e) {
+            helper.logging.error('getGroupInfo 失败：', e);
+            return null;
+        }
     }
     /**
      * 获取好友列表
      */
     async getFriendList() {
-        return await this._instance.get_friend_list();
+        try {
+            return await this._instance.get_friend_list();
+        }
+        catch (e) {
+            helper.logging.error('getFriendList 失败：', e);
+            return [];
+        }
     }
     /**
      * 获取QQ群列表
      */
     async getGroupList() {
-        return await this._instance.get_group_list();
+        try {
+            return await this._instance.get_group_list();
+        }
+        catch (e) {
+            helper.logging.error('getGroupList 失败：', e);
+            return [];
+        }
     }
     /**
      * 获取群成员列表
      * @param id 群号
      */
     async getGroupMemberList(id) {
-        let re = await this._instance.get_group_member_list({ group_id: id });
-        return re;
+        try {
+            let re = await this._instance.get_group_member_list({ group_id: id });
+            return re;
+        }
+        catch (e) {
+            helper.logging.error('getGroupMemberList 失败：', e);
+            return [];
+        }
     }
     /**
      * 获取群禁言列表
      * @param id 群号
      */
     async getGroupShutList(id) {
-        const list = await this.getGroupMemberList(id);
-        return list.filter((value) => value.shut_up_timestamp > 0);
+        try {
+            const list = await this.getGroupMemberList(id);
+            return list.filter((value) => value.shut_up_timestamp > 0);
+        }
+        catch (e) {
+            helper.logging.error('getGroupShutList 失败：', e);
+            return [];
+        }
     }
     /**
      * 用于其他一些api的调用
@@ -130,7 +203,7 @@ export class Api {
      * 群组踢人
      * @param groupId 群号
      * @param memberId 被踢人QQ号
-     * @param refuseToJoin 是否拒绝再次入群请求
+     * @param [refuseToJoin=false] 是否拒绝再次入群请求
      */
     async setGroupKick(groupId, memberId, refuseToJoin = false) {
         await this._instance.set_group_kick({
@@ -143,7 +216,7 @@ export class Api {
      * 群组单人禁言
      * @param groupId 群号
      * @param memberId 被禁言人QQ号
-     * @param duration 禁言时长，单位秒，0为取消禁言
+     * @param [duration=600] 禁言时长，单位秒，0为取消禁言
      */
     async setGroupBan(groupId, memberId, duration = 600) {
         await this._instance.set_group_ban({
@@ -155,7 +228,7 @@ export class Api {
     /**
      * 群组全体禁言
      * @param groupId 群号
-     * @param enable 是否禁言
+     * @param [enable=true] 是否禁言
      */
     async setGroupWholeBan(groupId, enable = true) {
         await this._instance.set_group_whole_ban({
@@ -167,7 +240,7 @@ export class Api {
      * 群组设置管理员
      * @param groupId 群号
      * @param memberId 管理员QQ号
-     * @param enable true 为设置，false 为取消
+     * @param [enable=true] true 为设置，false 为取消
      */
     async setGroupAdmin(groupId, memberId, enable = true) {
         await this._instance.set_group_admin({
@@ -180,7 +253,7 @@ export class Api {
      * 设置成员群名片
      * @param groupId 群号
      * @param memberId 群成员QQ号
-     * @param card 群名片
+     * @param [card=''] 群名片
      */
     async setGroupCard(groupId, memberId, card = '') {
         await this._instance.set_group_card({
@@ -213,7 +286,7 @@ export class Api {
      * 设置群组专属头衔
      * @param groupId 群号
      * @param memberId 群成员QQ号，不填或空字符串表示删除专属头衔
-     * @param title 群组专属头衔
+     * @param [title=''] 群组专属头衔
      */
     async setGroupSpecialTitle(groupId, memberId, title = '') {
         await this._instance.set_group_special_title({

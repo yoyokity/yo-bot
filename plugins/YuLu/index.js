@@ -49,6 +49,10 @@ bot.addPlugin({
         if (message.replyId && helper.checkCommand(message, '收录')) {
             //获取消息
             let replyMessage = await bot.Api.getMessage(message.replyId)
+            if (!replyMessage) {
+                bot.Api.sendMessage('获取不到想要收录的消息', message.groupId)
+                return
+            }
 
             //解析消息并储存
             let qqId = replyMessage.senderId

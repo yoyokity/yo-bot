@@ -16,7 +16,7 @@ export declare class Api {
      * 通过消息id获取消息内容
      * @param id 消息id
      */
-    getMessage(id: number): Promise<Message>;
+    getMessage(id: number): Promise<Message | null>;
     /**
      * 撤回消息
      * @param {number} id 消息id
@@ -33,14 +33,14 @@ export declare class Api {
      * @param groupId 群号
      * @param memberId 群成员QQ号
      */
-    getGroupMemberInfo(groupId: number, memberId: number): Promise<GroupMemberInfo>;
+    getGroupMemberInfo(groupId: number, memberId: number): Promise<GroupMemberInfo | null>;
     /**
      * 获取机器人QQ信息
      */
     getBotInfo(): Promise<{
         user_id: number;
         nickname: string;
-    }>;
+    } | null>;
     /**
      * 获取机器人在群组中是否有管理员权限
      * @param groupId 群号
@@ -50,12 +50,12 @@ export declare class Api {
      * 获取某个QQ号的信息
      * @param id QQ号
      */
-    getQQInfo(id: number): Promise<QQInfo>;
+    getQQInfo(id: number): Promise<QQInfo | null>;
     /**
      * 获取群信息
      * @param id 群号
      */
-    getGroupInfo(id: number): Promise<GroupInfo>;
+    getGroupInfo(id: number): Promise<GroupInfo | null>;
     /**
      * 获取好友列表
      */
@@ -82,34 +82,34 @@ export declare class Api {
      * 群组踢人
      * @param groupId 群号
      * @param memberId 被踢人QQ号
-     * @param refuseToJoin 是否拒绝再次入群请求
+     * @param [refuseToJoin=false] 是否拒绝再次入群请求
      */
     setGroupKick(groupId: number, memberId: number, refuseToJoin?: boolean): Promise<void>;
     /**
      * 群组单人禁言
      * @param groupId 群号
      * @param memberId 被禁言人QQ号
-     * @param duration 禁言时长，单位秒，0为取消禁言
+     * @param [duration=600] 禁言时长，单位秒，0为取消禁言
      */
     setGroupBan(groupId: number, memberId: number, duration?: number): Promise<void>;
     /**
      * 群组全体禁言
      * @param groupId 群号
-     * @param enable 是否禁言
+     * @param [enable=true] 是否禁言
      */
     setGroupWholeBan(groupId: number, enable?: boolean): Promise<void>;
     /**
      * 群组设置管理员
      * @param groupId 群号
      * @param memberId 管理员QQ号
-     * @param enable true 为设置，false 为取消
+     * @param [enable=true] true 为设置，false 为取消
      */
     setGroupAdmin(groupId: number, memberId: number, enable?: boolean): Promise<void>;
     /**
      * 设置成员群名片
      * @param groupId 群号
      * @param memberId 群成员QQ号
-     * @param card 群名片
+     * @param [card=''] 群名片
      */
     setGroupCard(groupId: number, memberId: number, card?: string): Promise<void>;
     /**
@@ -127,7 +127,7 @@ export declare class Api {
      * 设置群组专属头衔
      * @param groupId 群号
      * @param memberId 群成员QQ号，不填或空字符串表示删除专属头衔
-     * @param title 群组专属头衔
+     * @param [title=''] 群组专属头衔
      */
     setGroupSpecialTitle(groupId: number, memberId: number, title?: string): Promise<void>;
 }

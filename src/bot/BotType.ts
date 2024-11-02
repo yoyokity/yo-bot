@@ -11,7 +11,7 @@ import { Api } from './ApiType.js'
 export class Bot {
     public readonly instance: NCWebsocket
     /** OneBot Api */
-    public readonly Api: any
+    public readonly Api: Api
     private readonly _debug: boolean
     private readonly _host: string
     private readonly _port: number
