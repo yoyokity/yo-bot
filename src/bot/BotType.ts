@@ -102,18 +102,47 @@ export class Bot {
             if (!this._userFilter(message)) return
 
             //监听help信息
-            if (helper.checkCommand(message, 'help', true)) {
-                let text = `${this._botName}当前启用了以下插件：\n`
-                let index = 1
-                for (const plugin of this._plugins.values()) {
-                    text += `${index}. ${plugin.name}\n`
-                    index++
-                }
-                text += `查看具体插件操作可以在 help 指令后面加上插件名称或序号`
+            if (helper.checkCommand(message, 'help')) {
+                if (message.message.length === 1 && message.message[0].type === 'text') {
+                    const result = message.message[0].data.text.split('help')[1]?.trim()
 
-                return
+                    if (result === 'more') {
+                        // 更多bot信息
+                        bot.Api.replyMessage(message, `更多有关于yoBot的内容请前往：https://github.com/yoyokity/yo-bot`)
+                        return
+                    }
+
+                    // 插件help
+                    const plugins = [...this._plugins.values()]
+                    const target = plugins.find((plugin, index) =>
+                        plugin.name === result || String(index + 1) === result
+                    )
+
+                    if (target) {
+                        let text = `【${target.name}】\n●${target.description}\n●指令如下\n------------\n` +
+                            target.commandHelp.map((value) =>
+                                `${this.prefix[0]}${value.commandKey}：${value.help}`
+                            ).join('\n')
+                        bot.Api.replyMessage(message, text)
+                        return
+                    }
+
+                    // help根指令
+                    const pluginList = this._plugins.size
+                        ? '●当前启用了以下插件：\n------------\n' +
+                        plugins.map((plugin, index) => `${index + 1}. ${plugin.name}`).join('\n') +
+                        '\n------------\n'
+                        : '●当前未启用任何插件\n'
+
+                    const helpText = `●${this._botName}为你提供帮助，命令前缀 ${this.prefix[0]}\n` +
+                        pluginList +
+                        `●具体插件帮助在【help】后加上插件名称或序号\n●更多bot信息使用【help more】`
+
+                    bot.Api.replyMessage(message, helpText)
+                }
             }
-            //添加插件
+
+            //添加插件监控消息
             for (const plugin of this._plugins.values()) {
                 plugin.onMessage(message)
             }
@@ -146,13 +175,13 @@ export class Bot {
                 const packagePath = itemPath.join('package.json')
 
                 // 检查package.json文件
-                if (!packagePath.isExist) return
+                if (!packagePath.isExist) continue
                 const packageJson = helper.json.read(packagePath.str)
-                if (!packageJson.enable) return
+                if (!packageJson.enable) continue
 
                 // 获取index文件路径
                 const indexPath = itemPath.join(packageJson.main)
-                if (!indexPath.isExist) return
+                if (!indexPath.isExist) continue
 
                 //安装依赖
                 if ('dependencies' in packageJson) {
@@ -162,7 +191,7 @@ export class Bot {
                         await execAsync('npm install', { cwd: itemPath.str })
                     } catch (error) {
                         helper.logging.error(`安装错误: ${error}`)
-                        return
+                        continue
                     }
                 }
 
