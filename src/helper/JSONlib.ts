@@ -25,8 +25,9 @@ export class JSONlib {
      * 写入json文件
      * @param file 文件路径
      * @param data 对象数据
+     * @param [beautify=true] 是否美化输出
      */
-    write (file: string, data: any): boolean {
+    write (file: string, data: any, beautify = true): boolean {
         try {
             //确保目录存在
             let path = helper.path.new(file)
@@ -34,7 +35,7 @@ export class JSONlib {
                 helper.path.createPath(path.str)
             }
 
-            const jsonData = JSON.stringify(data, null, 2)
+            const jsonData = JSON.stringify(data, null, beautify ? 2 : undefined)
             fs.writeFileSync(path.str, jsonData, 'utf8')
             return true
         } catch (error) {

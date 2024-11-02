@@ -8,6 +8,7 @@ export declare class JSONlib {
      * 写入json文件
      * @param file 文件路径
      * @param data 对象数据
+     * @param [beautify=true] 是否美化输出
      */
-    write(file: string, data: any): boolean;
+    write(file: string, data: any, beautify?: boolean): boolean;
 }
