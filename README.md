@@ -53,8 +53,8 @@
    //botName、master必须填，其他的可以选填，不填的可以删除或值设为null
    
    {
-     "botName": string,		//必填，机器人名字
-     "master": number,			//必填，主人QQ号
+     "botName": string,      //必填，机器人名字
+     "master": number,      //必填，主人QQ号
      "host": string,			//ws地址，默认为本机
      "port": number,			//ws端口，默认为3001
      "debug": boolean,			//是否启用调试模式，会输出每次消息和心跳，默认为false
