@@ -19,77 +19,13 @@
 
 
 
-## 使用前
+## 说明文档
 
-**安装node并启动NapCat**
+> 快速说明：**下载** + **配置config文件** + **启动
 
-
-
-1. 安装 [node](https://nodejs.org/zh-cn/download/package-manager) 环境
-
-2. 安装 [NapCat](https://github.com/NapNeko/NapCatQQ/releases)
-
-3. 启用 NapCat 的正向ws，端口请保持和yobot的端口设置一致，默认为3001
-
-   ```json
-   "ws": {
-       "enable": true,
-       "host": "",
-       "port": 3001
-     },
-   ```
-
-4. 运行 NapCat
-
-
-
-## 使用
-
-1. 使用git或者直接下载源码到本地
-
-2. 设置config.json
-
-   ```js
-   //botName、master必须填，其他的可以选填，不填的可以删除或值设为null
-   
-   {
-     "botName": string,		//必填，机器人名字
-     "master": number,			//必填，主人QQ号
-     "host": string,			//ws地址，默认为本机
-     "port": number,			//ws端口，默认为3001
-     "debug": boolean,			//是否启用调试模式，会输出每次消息和心跳，默认为false
-     "prefix": string[],			//命令前缀，一个数组元素对应一个前缀，默认为['.']
-     "group": number[],			//允许的群组，null表示拉黑全部，[]表示接受全部，默认为[]
-     "groupBlacklist": number[],			//群组黑名单，[]则无黑名单，先判断group再判断黑名单，默认为[]
-     "userBlacklist": number[],			//用户黑名单，[]表示无黑名单，默认为[]
-     "canPrivate": boolean,			//是否允许私聊，默认true
-     "canTemporary": boolean			//是否允许临时会话，默认false
-   }
-   ```
-
-   
-
-3. 点击bat启动
-
-
-
-## 插件
-
-将插件文件夹拖入plugins文件夹即可。
-
-目录结构必须如下：
-
-```tex
-plugins/
-├── 插件1/
-│   ├── *.js
-│   └── package.json
-├── 插件2/
-│   ├── *.js
-│   └── package.json
-```
-
-不需要的插件可以删除或者在package.json中设置`"enable": false`
+- [使用前准备](https://github.com/yoyokity/yo-bot/wiki/%E4%BD%BF%E7%94%A8%E5%89%8D)
+- [使用说明](https://github.com/yoyokity/yo-bot/wiki/%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E)
+- [插件开发](https://github.com/yoyokity/yo-bot/wiki/%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91)
 
 
 
@@ -99,4 +35,8 @@ plugins/
 > **请不要在 QQ 官方群聊和任何影响力较大的简中互联网平台（包括但不限于: 哔哩哔哩，微博，知乎，抖音等）发布和讨论*任何*与本项目存在相关性的信息**
 
 任何使用本仓库代码的地方，都应当严格遵守[本仓库开源许可](./LICENSE)。
+
+```js
+
+```
 
