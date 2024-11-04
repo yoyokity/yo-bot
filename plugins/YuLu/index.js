@@ -1,6 +1,8 @@
 import { Structs } from 'node-napcat-ts'
 import { createImg } from './img.js'
 
+let nextTime = 0
+
 bot.addPlugin({
     /**
      * 插件名称
@@ -21,7 +23,7 @@ bot.addPlugin({
      * 描述，作为help输出
      * @type {string}
      */
-    description: '用于记录群友逆天发言的东西。',
+    description: '用于记录群友逆天发言的东西，5秒内只能发送一条语录',
     /**
      * 指令描述，作为help输出。
      * 一个指令对应一个{}，commandKey不需要写指令前缀
@@ -36,6 +38,9 @@ bot.addPlugin({
     }, {
         commandKey: '语录 @xx',
         help: '随机发送一条指定对象的语录'
+    }, {
+        commandKey: '语录 xx',
+        help: '随机发送一条指定文本的语录'
     }],
 
     /**
@@ -46,11 +51,11 @@ bot.addPlugin({
         if (!message.isGroup) return
 
         //收录
-        if (message.replyId && helper.checkCommand(message, '收录')) {
+        if (message.replyId && message.commandCheckOnly('收录')) {
             //获取消息
             let replyMessage = await bot.Api.getMessage(message.replyId)
             if (!replyMessage) {
-                bot.Api.sendMessage('获取不到想要收录的消息', message.groupId)
+                message.replyMessage('获取不到想要收录的消息')
                 return
             }
 
@@ -60,7 +65,7 @@ bot.addPlugin({
                 return ['text', 'at'].includes(value.type)
             })
 
-            let jsonPath = `${helper.getPluginDataPath(this)}/${message.groupId}.json`
+            let jsonPath = `${bot.getPluginDataPath(this)}/${message.groupId}.json`
             /** @type {{}[]} */
             let data = helper.json.read(jsonPath)
             if (!data) {
@@ -68,21 +73,21 @@ bot.addPlugin({
             } else {
                 for (let datum of data) {
                     if (datum.replyId === message.replyId) {
-                        bot.Api.sendMessage('已经收录过该条语录', message.groupId)
+                        message.replyMessage('已经收录过该条语录')
                         return
                     }
                 }
             }
             data.push({ replyId: message.replyId, qqId, yulu })
 
-            if (helper.json.write(jsonPath, data,false)) {
+            if (helper.json.write(jsonPath, data, false)) {
                 let headImg = await bot.Api.getHeadImage(qqId)
                 let a = await bot.Api.getGroupMemberInfo(message.groupId, qqId)
                 let nickName = a.card || a.nickname
                 let img = await createImg(yulu, nickName, headImg, message.groupId, bot)
                 await bot.Api.sendMessage([Structs.image(img), Structs.text('收录成功')], message.groupId)
             } else {
-                bot.Api.sendMessage('收录失败', message.groupId)
+                message.replyMessage('收录失败')
             }
 
             return
@@ -95,14 +100,13 @@ bot.addPlugin({
         function read (pluginDataPath) {
             let data = helper.json.read(`${pluginDataPath}/${message.groupId}.json`)
             if (!data) {
-                bot.Api.sendMessage('未收录任何语录', message.groupId)
+                message.replyMessage('未收录任何语录')
                 return null
             }
             return data
         }
 
-        async function send (data) {
-            const chat = data[Math.floor(Math.random() * data.length)]
+        async function send (chat) {
             let yulu = chat.yulu
             let qqId = chat.qqId
             let headImg = await bot.Api.getHeadImage(qqId)
@@ -110,36 +114,70 @@ bot.addPlugin({
             let nickName = a.card || a.nickname
 
             let img = await createImg(yulu, nickName, headImg, message.groupId, bot)
-            await bot.Api.sendMessage([Structs.image(img)], message.groupId)
+            await message.replyMessage([Structs.image(img)])
         }
 
-        const isOnlyCommand = helper.checkCommand(message, '语录', true)
-        const isMentionCommand = helper.checkCommand(message, '语录', false)
+        /**
+         * 5秒内只能发送一条语录
+         */
+        function timeCheck () {
+            if (helper.nowTime < nextTime) {
+                return false
+            }
+            nextTime = helper.nowTime + 5 * 1000
+            return true
+        }
 
         //语录
-        if (isOnlyCommand) {
-            const data = read(helper.getPluginDataPath(this))
+        if (message.commandCheck('语录')){
+            let arg = message.commandGetArgs('语录')
+            const data = read(bot.getPluginDataPath(this))
             if (!data) return
 
-            await send(data)
-            return
-        }
-        //@某人的专属语录
-        if (isMentionCommand && message.message.length === 2 && message.message[1].type === 'at') {
-            const data = read(helper.getPluginDataPath(this))
-            if (!data) return
+            //发送语录
+            if (!arg){
+                if (!timeCheck()) return
 
-            let id = message.message[1].data.qq
-            if (id === 'all') {
-                await send(data)
+                const chat = helper.math.randomArrayOnce(data)
+                await send(chat)
                 return
             }
 
-            const filteredData = data.filter(value => value.qqId === Number(id))
-            if (filteredData.length > 0) {
-                await send(filteredData)
-            } else {
-                bot.Api.sendMessage('未收录该用户语录', message.groupId)
+            //指定语录
+            if (typeof arg === 'string'){
+                const filteredData = data.filter(value => {
+                    const yulu = value.yulu
+                    return yulu.some(yuluElement =>
+                        yuluElement.type === 'text' && yuluElement.data.text.includes(arg)
+                    )
+                })
+
+                if (filteredData.length > 0) {
+                    if (!timeCheck()) return
+                    const chat = helper.math.randomArrayOnce(filteredData, false)
+                    await send(chat)
+                } else {
+                    await message.replyMessage('未收录指定语录')
+                }
+                return
+            }
+
+            //@某人的专属语录
+            if (arg[0].type === 'at') {
+                let id =arg[0].data.qq
+                if (id === 'all') {
+                    const chat = helper.math.randomArrayOnce(data)
+                    await send(chat)
+                    return
+                }
+
+                const filteredData = data.filter(value => value.qqId === Number(id))
+                if (filteredData.length > 0) {
+                    const chat = helper.math.randomArrayOnce(filteredData, false)
+                    await send(chat)
+                } else {
+                    await message.replyMessage('未收录该用户语录')
+                }
             }
         }
     },

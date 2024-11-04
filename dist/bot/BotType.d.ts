@@ -84,4 +84,9 @@ export declare class Bot {
      * 判断当前信息所属的用户或群组是否允许响应
      */
     private _userFilter;
+    /**
+     * 获取插件的data路径，如果未创建则创建一个
+     * @param plugin 插件
+     */
+    getPluginDataPath(plugin: PluginInterface): string;
 }

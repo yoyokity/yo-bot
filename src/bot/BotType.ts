@@ -106,32 +106,12 @@ export class Bot {
             if (!this._userFilter(message)) return
 
             //监听help信息
-            if (helper.checkCommand(message, 'help')) {
-                if (message.message.length === 1 && message.message[0].type === 'text') {
-                    const result = message.message[0].data.text.split('help')[1]?.trim()
+            if (message.commandCheck('help')) {
+                let arg = message.commandGetArgs('help')
+                const plugins = [...this._plugins.values()]
 
-                    if (result === 'more') {
-                        // 更多bot信息
-                        bot.Api.replyMessage(message, `更多有关于yoBot的内容请前往：https://github.com/yoyokity/yo-bot`)
-                        return
-                    }
-
-                    // 插件help
-                    const plugins = [...this._plugins.values()]
-                    const target = plugins.find((plugin, index) =>
-                        plugin.name === result || String(index + 1) === result
-                    )
-
-                    if (target) {
-                        let text = `【${target.name}】\n●${target.description}\n●指令如下\n------------\n` +
-                            target.commandHelp.map((value) =>
-                                `${this.prefix[0]}${value.commandKey}：${value.help}`
-                            ).join('\n')
-                        bot.Api.replyMessage(message, text)
-                        return
-                    }
-
-                    // help根指令
+                // help根指令
+                if (!arg) {
                     const pluginList = this._plugins.size
                         ? '●当前启用了以下插件：\n------------\n' +
                         plugins.map((plugin, index) => `${index + 1}. ${plugin.name}`).join('\n') +
@@ -142,8 +122,31 @@ export class Bot {
                         pluginList +
                         `●具体插件帮助在【help】后加上插件名称或序号\n●更多bot信息使用【help more】`
 
-                    bot.Api.replyMessage(message, helpText)
+                    message.replyMessage( helpText)
+                    return
                 }
+
+                if (typeof arg !== 'string') return
+
+                // 更多bot信息
+                if (arg === 'more') {
+                    message.replyMessage(`更多有关于yoBot的内容请前往：https://github.com/yoyokity/yo-bot`)
+                    return
+                }
+
+                // 插件help
+                const target = plugins.find((plugin, index) =>
+                    plugin.name === arg || String(index + 1) === arg
+                )
+                if (target) {
+                    let text = `${target.name}\n●${target.description}\n●指令如下\n------------\n` +
+                        target.commandHelp.map((value) =>
+                            `【${this.prefix[0]}${value.commandKey}】 ${value.help}`
+                        ).join('\n')
+                    message.replyMessage( text)
+                    return
+                }
+                return
             }
 
             //添加插件监控消息
@@ -268,5 +271,15 @@ export class Bot {
 
         // 检查私聊消息的用户黑名单
         return !(message.isPrivate && this.userBlacklist.includes(message.senderId))
+    }
+
+    /**
+     * 获取插件的data路径，如果未创建则创建一个
+     * @param plugin 插件
+     */
+    public getPluginDataPath (plugin: PluginInterface): string {
+        let path = helper.path.appDir.join('data', plugin.name)
+        helper.path.createPath(path.str)
+        return path.str
     }
 }

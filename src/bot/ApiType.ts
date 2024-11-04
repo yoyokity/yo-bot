@@ -31,29 +31,6 @@ export class Api {
     }
 
     /**
-     * 快速回复消息（自动判断群组和私聊）
-     * @param message 要回复的消息
-     * @param structsText 回复的文本
-     * @param [at=false] 是否艾特回复对象
-     * @param [reply=false] 是否引用要回复的消息
-     * @return {Promise<number>} 返回本条发送的消息的id
-     */
-    async replyMessage (message: Message, structsText: Send[keyof Send][] | string, at: boolean = false, reply: boolean = false): Promise<number> {
-        let structs = []
-        if (reply) structs.push(Structs.reply(message.messageId))
-        if (at) structs.push(Structs.at(message.senderId), Structs.text(' '))
-        let text = structsText
-        if (typeof text === 'string') text = [Structs.text(text)]
-        structs.push(...text)
-
-        if (message.isGroup) {
-            return bot.Api.sendMessage(structs, message.groupId)
-        } else {
-            return bot.Api.sendMessage(structs, message.senderId, false)
-        }
-    }
-
-    /**
      * 通过消息id获取消息内容
      * @param id 消息id
      */

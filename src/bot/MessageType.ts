@@ -1,4 +1,12 @@
-import { GroupMessage, MessageType, PrivateFriendMessage, PrivateGroupMessage, Receive, Send } from 'node-napcat-ts'
+import {
+    GroupMessage,
+    MessageType,
+    PrivateFriendMessage,
+    PrivateGroupMessage,
+    Receive,
+    Send,
+    Structs
+} from 'node-napcat-ts'
 
 export class Message {
     private readonly self_id: number
@@ -128,5 +136,114 @@ export class Message {
     get replyId (): number {
         const found = this.message?.find(item => item.type === 'reply')
         return found ? Number(found.data['id']) : 0
+    }
+
+    /**
+     * 检查消息是否包含命令
+     * @param command 命令（可多条）
+     * @param [atStart=true] 命令是否在消息开头（除了回复引用）
+     */
+    public commandCheck (command: string | [string], atStart: boolean = true): boolean {
+        if (typeof command === 'string') command = [command]
+        const check = (text: string) =>
+            bot.prefix.some((prefix: string) => command.some(cmd => text.includes(prefix + cmd)))
+
+        let message = this.message.filter((value) => value.type !== 'reply')
+        if (atStart) {
+            if (message[0].type !== 'text') return false
+            let text = message[0].data.text
+            return bot.prefix.some((prefix: string) => command.some(cmd => text.startsWith(prefix + cmd)))
+        } else {
+            for (let value of message) {
+                if (value.type !== 'text') continue
+                if (check(value.data.text)) return true
+            }
+        }
+
+        return false
+    }
+
+    /**
+     * 检查消息是否只包含命令，(不含其余任何东西，除了回复引用)
+     * @param command 命令（可多条）
+     * @param [atMe=false] 是否艾特了机器人（不论艾特在命令前面还是后面）
+     */
+    public commandCheckOnly (command: string | [string], atMe: boolean = false): boolean {
+        if (typeof command === 'string') command = [command]
+        const check = (text: string) =>
+            bot.prefix.some((prefix: string) => command.some(cmd => text === prefix + cmd))
+
+        let message = this.message.filter((value) => value.type !== 'reply')
+        if (atMe) {
+            if (message.length !== 2) return false
+            if (message[0].type === 'at') {
+                if (message[0].data['qq'] !== String(this.botId)) return false
+                if (message[1].type !== 'text') return false
+                if (check(message[1].data.text.trim())) return true
+            }
+            if (message[0].type === 'text') {
+                if (message[1].type !== 'at') return false
+                if (message[1].data['qq'] !== String(this.botId)) return false
+                if (check(message[0].data.text.trim())) return true
+            }
+        } else {
+            if (message.length !== 1) return false
+            if (message[0].type !== 'text') return false
+            if (check(message[0].data.text.trim())) return true
+        }
+
+        return false
+    }
+
+    /**
+     * 获取命令后的内容
+     * @param command 命令（可多条）
+     * @return 如果获取到的只有文本，则去除两边空格后返回string，否则返回结构体，没有则返回null
+     */
+    public commandGetArgs (command: string | [string]): string | Receive[keyof Receive][] | null {
+        if (typeof command === 'string') command = [command]
+        let outArgs: Receive[keyof Receive][] = []
+        this.message.forEach((value, index, array) => {
+            if (value.type !== 'text') return
+            let text = value.data.text
+            let sp = ''
+            if (command.some((value) => {
+                sp = value
+                return text.includes(value)
+            })) {
+                let end = text.split(sp)[1]
+                if (end.trim() !== ''){
+                    outArgs.push(Structs.text(end))
+                }
+                outArgs.push(...this.message.slice(index + 1))
+                return
+            }
+        })
+        if (outArgs.length === 1 && outArgs[0].type === 'text') {
+            return outArgs[0].data.text.trim()
+        }
+        return outArgs.length > 0 ? outArgs : null
+    }
+
+    /**
+     * 快速回复消息（自动判断群组和私聊）
+     * @param structsText 回复的文本
+     * @param [at=false] 是否艾特回复对象
+     * @param [reply=false] 是否引用要回复的消息
+     * @return {Promise<number>} 返回本条发送的消息的id
+     */
+    async replyMessage (structsText: Send[keyof Send][] | string, at: boolean = false, reply: boolean = false): Promise<number> {
+        let structs = []
+        if (reply) structs.push(Structs.reply(this.messageId))
+        if (at) structs.push(Structs.at(this.senderId), Structs.text(' '))
+        let text = structsText
+        if (typeof text === 'string') text = [Structs.text(text)]
+        structs.push(...text)
+
+        if (this.isGroup) {
+            return bot.Api.sendMessage(structs, this.groupId)
+        } else {
+            return bot.Api.sendMessage(structs, this.senderId, false)
+        }
     }
 }

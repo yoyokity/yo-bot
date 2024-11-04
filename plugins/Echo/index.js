@@ -38,12 +38,12 @@ bot.addPlugin({
     async onMessage (message) {
         if (!message.isPrivate) return
 
-        if (helper.checkCommand(message, '复读')) {
+        if (message.commandCheck('复读')) {
             const match = message.messageRaw.match(/复读(.*)/)
             if (match) {
                 let text = match[1].trim()
                 if (text === '') return
-                await bot.Api.sendMessage(text, message.senderId,false)
+                await message.replyMessage(text)
             }
         }
     },
