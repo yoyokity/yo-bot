@@ -1,14 +1,17 @@
 import { Pathlib } from './Pathlib.js';
 import { Logging } from './logging.js';
 import { JSONlib } from './JSONlib.js';
+import { Mathlib } from './Mathlib.js';
 export class Helper {
     _path;
     _logging;
     _jsonLib;
+    _math;
     constructor(appDir) {
         this._path = new Pathlib(appDir);
         console.log(`appDir: ${appDir}`);
         this._jsonLib = new JSONlib();
+        this._math = new Mathlib();
         //log目录
         let logDir = this._path.appDir.join('log');
         this._path.createPath(logDir.str);
@@ -23,6 +26,15 @@ export class Helper {
     }
     get json() {
         return this._jsonLib;
+    }
+    get math() {
+        return this._math;
+    }
+    /**
+     * 获取当前时间戳
+     */
+    get now() {
+        return Date.now();
     }
     /**
      * 检查消息是否包含命令

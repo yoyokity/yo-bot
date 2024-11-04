@@ -48,6 +48,9 @@ export class Bot {
             host: host,
             port: port
         }, debug);
+        if (debug) {
+            helper.logging.info('启用调试模式');
+        }
         this.Api = new Api(this);
         this._botName = botName;
         this._debug = debug;
@@ -99,7 +102,9 @@ export class Bot {
             }
             //添加插件监控消息
             for (const plugin of this._plugins.values()) {
-                plugin.onMessage(message);
+                plugin.onMessage(message).catch((e) => {
+                    helper.logging.error(`插件【${plugin.name}】发生错误：`, e);
+                });
             }
         });
         await this.instance.connect();

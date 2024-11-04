@@ -47,12 +47,30 @@ export class Logging {
     }
 
     error (...message: any[]) {
+        message = formatError(...message)
+
         console.error(`[${this.getTime()}] [error]`, ...message)
         this.writeFile(`[${this.getTime()}] [error] ${message.join(' ')}`)
     }
 
     warn (...message: any[]) {
+        message = formatError(...message)
+
         console.warn(`[${this.getTime()}] [warn]`, ...message)
         this.writeFile(`[${this.getTime()}] [warn] ${message.join(' ')}`)
     }
+}
+
+/**
+ * 格式化错误信息
+ */
+function formatError (...message: any[]) {
+    message.forEach((value, index, array) => {
+        if (typeof value === 'object' && 'stack' in value) {
+            value = value.stack
+            value = value.replaceAll('file:///', '')
+            array[index] = value
+        }
+    })
+    return message
 }

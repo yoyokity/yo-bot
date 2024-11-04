@@ -3,17 +3,20 @@ import { Logging } from './logging.js'
 import { Message } from '../bot/MessageType.js'
 import { JSONlib } from './JSONlib.js'
 import type { PluginInterface } from '../bot/interface.js'
+import { Mathlib } from './Mathlib.js'
 
 export class Helper {
     private readonly _path: Pathlib
     private readonly _logging: Logging
     private readonly _jsonLib: JSONlib
+    private readonly _math: Mathlib
 
     constructor (appDir: string) {
         this._path = new Pathlib(appDir)
         console.log(`appDir: ${appDir}`)
 
         this._jsonLib = new JSONlib()
+        this._math = new Mathlib()
 
         //log目录
         let logDir = this._path.appDir.join('log')
@@ -33,6 +36,17 @@ export class Helper {
 
     get json () {
         return this._jsonLib
+    }
+
+    get math () {
+        return this._math
+    }
+
+    /**
+     * 获取当前时间戳
+     */
+    get now () {
+        return Date.now()
     }
 
     /**

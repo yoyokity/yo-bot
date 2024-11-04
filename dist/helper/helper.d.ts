@@ -3,14 +3,21 @@ import { Logging } from './logging.js';
 import { Message } from '../bot/MessageType.js';
 import { JSONlib } from './JSONlib.js';
 import type { PluginInterface } from '../bot/interface.js';
+import { Mathlib } from './Mathlib.js';
 export declare class Helper {
     private readonly _path;
     private readonly _logging;
     private readonly _jsonLib;
+    private readonly _math;
     constructor(appDir: string);
     get path(): Pathlib;
     get logging(): Logging;
     get json(): JSONlib;
+    get math(): Mathlib;
+    /**
+     * 获取当前时间戳
+     */
+    get now(): number;
     /**
      * 检查消息是否包含命令
      * @param  message 目标消息
