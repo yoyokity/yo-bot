@@ -1,4 +1,6 @@
-import { createCanvas, loadImage, registerFont } from 'canvas'
+import { createCanvas, Image, loadImage, registerFont } from 'canvas'
+import { globalState } from './globalState.js'
+import * as fs from 'node:fs'
 
 registerFont(helper.path.appDir.join('plugins/YuLu/resource/font/font.ttf').str, { family: 'Custom' })
 
@@ -25,10 +27,19 @@ export async function createImg (yulu, nickName, headImg, groupId, bot) {
 
     //修改高度
     ctx.font = `bold ${fontSize}px Custom`
-    let re = await parseYulu(ctx, canvasWidth - headSize - spacing * 3, yulu, groupId, bot)
+    let contentMaxWidth = canvasWidth - headSize - spacing * 3
+    let re = await parseYulu(ctx, contentMaxWidth, yulu, groupId, bot)
     let text = re.text
     let canvasHeight = spacing * 2 + fontSize * (re.lineCount + 2) + fontSize
-    if (canvasHeight < headSize + spacing * 2) {
+    if (re.imgs) {   //计算图片
+        for (let img of re.imgs) {
+            let targetHeight = (contentMaxWidth / img.width) * img.height
+            let height = targetHeight + fontSize
+            canvasHeight += height
+        }
+        canvasHeight -= fontSize
+    }
+    if (canvasHeight < headSize + spacing * 2) {    //最小值
         canvasHeight = headSize + spacing * 2
     }
     canvas.height = canvasHeight
@@ -56,16 +67,30 @@ export async function createImg (yulu, nickName, headImg, groupId, bot) {
     ctx.fillStyle = color
     ctx.textAlign = 'left'
     let textX = spacing * 2 + headSize
-    let textY = spacing + fontSize
+    let textY = spacing
 
-    // 绘制文本
-    ctx.fillStyle = color
-    ctx.fillText(text, textX, textY)
+    if (text !== '') {
+        textY += fontSize
+        ctx.fillStyle = color
+        ctx.fillText(text, textX, textY)
+
+        textY = spacing + fontSize * (re.lineCount + 1)
+    }
+
+    //绘制图片
+    if (re.imgs) {
+        for (let img of re.imgs) {
+            let targetWidth = contentMaxWidth
+            let targetHeight = (targetWidth / img.width) * img.height
+            ctx.drawImage(img, textX, textY, targetWidth, targetHeight)
+            textY = textY + targetHeight + fontSize
+        }
+    }
 
     //绘制作者
     ctx.textAlign = 'right'
     textX = canvasWidth - spacing * 2
-    textY = spacing + fontSize * (re.lineCount + 3)
+    textY = textY + fontSize
     ctx.fillText(`—— ${nickName}`, textX, textY)
 
     return canvas.toBuffer('image/jpeg')
@@ -73,7 +98,8 @@ export async function createImg (yulu, nickName, headImg, groupId, bot) {
 
 async function parseYulu (ctx, maxWidth, yulu, groupId, bot) {
     let text = ''
-    let imgs =[]
+    /** @type {Image[]} */
+    let imgs = []
     for (let element of yulu) {
         switch (element.type) {
             case 'text':
@@ -90,7 +116,8 @@ async function parseYulu (ctx, maxWidth, yulu, groupId, bot) {
                 }
                 break
             case 'image':
-                imgs.push(element.data.url)
+                let img =  fs.readFileSync(`${globalState.dataImgPath}\\${element.data.file}`)
+                if (img) imgs.push(await loadImage(img))
                 break
             default:
                 break
@@ -113,5 +140,5 @@ async function parseYulu (ctx, maxWidth, yulu, groupId, bot) {
         }
     }
 
-    return { text: newText.join('\n'), lineCount: newText.length }
+    return { text: newText.join('\n'), lineCount: newText.length, imgs: imgs.length > 0 ? imgs : null }
 }
