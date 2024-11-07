@@ -1,5 +1,6 @@
 import { Structs } from 'node-napcat-ts'
 import { createImg } from './img.js'
+import { Message } from '../../src/bot/MessageType.js'
 
 let nextTime = 0
 
@@ -31,7 +32,7 @@ bot.addPlugin({
      */
     commandHelp: [{
         commandKey: '收录',
-        help: '在目标消息下回复即可收录'
+        help: '在目标消息下回复即可收录，收录多条可以在转发消息下回复'
     }, {
         commandKey: '语录',
         help: '随机发送一条语录'
@@ -61,9 +62,33 @@ bot.addPlugin({
 
             //解析消息并储存
             let qqId = replyMessage.senderId
-            let yulu = replyMessage.message.filter((value, index, array) => {
-                return ['text', 'at'].includes(value.type)
-            })
+            if (replyMessage.message[0].type === 'forward') {
+                //多条转发
+                const content = replyMessage.message[0].data['content']
+                const sender = content[0].user_id
+
+                // 过滤并处理消息内容的函数
+                const filterMessages = (messages) => {
+                    return messages
+                        .filter(v => v.senderId === sender)
+                        .flatMap(v => {
+                            /** @type {Message} */
+                            const m = new Message(v)
+                            return m.message.filter(item => ['text', 'at'].includes(item.type))
+                        })
+                        .map(value => {
+                            if (value.type === 'text') {
+                                value.data.text = value.data.text.trim() + '\n\n'
+                            }
+                            return value
+                        })
+                }
+
+                var yulu = filterMessages(content)
+            } else {
+                //单条
+                var yulu = replyMessage.message.filter(value => ['text', 'at'].includes(value.type))
+            }
 
             let jsonPath = `${bot.getPluginDataPath(this)}/${message.groupId}.json`
             /** @type {{}[]} */
