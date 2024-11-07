@@ -63,6 +63,10 @@ export declare class Message {
      */
     get isAtSelf(): boolean;
     /**
+     * 按顺序获取消息中被at的所有人，忽略艾特全体和艾特机器人
+     */
+    get atList(): number[];
+    /**
      * 获取当前消息所回复的消息的id
      */
     get replyId(): number;

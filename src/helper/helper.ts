@@ -2,12 +2,14 @@ import { Pathlib } from './Pathlib.js'
 import { Logging } from './logging.js'
 import { JSONlib } from './JSONlib.js'
 import { Mathlib } from './Mathlib.js'
+import { NetworkLib } from './NetworkLib.js'
 
 export class Helper {
     private readonly _path: Pathlib
     private readonly _logging: Logging
     private readonly _jsonLib: JSONlib
     private readonly _math: Mathlib
+    private readonly _newtwork: NetworkLib
 
     constructor (appDir: string) {
         this._path = new Pathlib(appDir)
@@ -15,6 +17,7 @@ export class Helper {
 
         this._jsonLib = new JSONlib()
         this._math = new Mathlib()
+        this._newtwork = new NetworkLib()
 
         //log目录
         let logDir = this._path.appDir.join('log')
@@ -57,5 +60,12 @@ export class Helper {
      */
     get nowTime () {
         return Date.now()
+    }
+
+    /**
+     * 网络相关
+     */
+    get newtwork(){
+        return this._newtwork
     }
 }

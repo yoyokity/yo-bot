@@ -101,6 +101,20 @@ export class Message {
         return this.message?.some(message => message.type === 'at' && message.data['qq'] === String(this.self_id)) || false;
     }
     /**
+     * 按顺序获取消息中被at的所有人，忽略艾特全体和艾特机器人
+     */
+    get atList() {
+        let atList = [];
+        this.message?.filter(message => message.type === 'at').forEach((value) => {
+            if (value.data['qq'] === String(this.self_id))
+                return;
+            if (value.data['qq'] === 'all')
+                return;
+            atList.push(Number(value.data['qq']));
+        });
+        return atList;
+    }
+    /**
      * 获取当前消息所回复的消息的id
      */
     get replyId() {

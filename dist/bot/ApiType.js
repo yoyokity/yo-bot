@@ -1,4 +1,3 @@
-import { got } from 'got';
 import { Message } from './MessageType.js';
 export class Api {
     _instance;
@@ -58,16 +57,7 @@ export class Api {
      */
     async getHeadImage(id) {
         const imgUrl = `http://q.qlogo.cn/headimg_dl?dst_uin=${id}&spec=640&img_type=jpg`;
-        try {
-            const response = await got(imgUrl, {
-                responseType: 'buffer',
-            });
-            return response.body;
-        }
-        catch (error) {
-            helper.logging.error(`获取头像失败：${imgUrl}`, error);
-        }
-        return null;
+        return await helper.newtwork.getImage(imgUrl);
     }
     /**
      * 获取某个群成员信息

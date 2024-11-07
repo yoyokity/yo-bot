@@ -131,6 +131,19 @@ export class Message {
     }
 
     /**
+     * 按顺序获取消息中被at的所有人，忽略艾特全体和艾特机器人
+     */
+    get atList (): number[] {
+        let atList: number[] = []
+        this.message?.filter(message => message.type === 'at').forEach((value) => {
+            if (value.data['qq'] === String(this.self_id)) return
+            if (value.data['qq'] === 'all') return
+            atList.push(Number(value.data['qq']))
+        })
+        return atList
+    }
+
+    /**
      * 获取当前消息所回复的消息的id
      */
     get replyId (): number {
@@ -212,7 +225,7 @@ export class Message {
                 return text.includes(value)
             })) {
                 let end = text.split(sp)[1]
-                if (end.trim() !== ''){
+                if (end.trim() !== '') {
                     outArgs.push(Structs.text(end))
                 }
                 outArgs.push(...this.message.slice(index + 1))
