@@ -69,7 +69,7 @@ export declare class Message {
     /**
      * 检查消息是否包含命令
      * @param command 命令（可多条）
-     * @param [atStart=true] 命令是否在消息开头（除了回复引用）
+     * @param [atStart=false] 命令是否在消息开头（除了回复引用）
      */
     commandCheck(command: string | [string], atStart?: boolean): boolean;
     /**

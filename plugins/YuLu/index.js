@@ -51,7 +51,7 @@ bot.addPlugin({
         if (!message.isGroup) return
 
         //收录
-        if (message.replyId && message.commandCheckOnly('收录')) {
+        if (message.replyId && message.commandCheck('收录')) {
             //获取消息
             let replyMessage = await bot.Api.getMessage(message.replyId)
             if (!replyMessage) {
@@ -85,9 +85,9 @@ bot.addPlugin({
                 let a = await bot.Api.getGroupMemberInfo(message.groupId, qqId)
                 let nickName = a.card || a.nickname
                 let img = await createImg(yulu, nickName, headImg, message.groupId, bot)
-                await bot.Api.sendMessage([Structs.image(img), Structs.text('收录成功')], message.groupId)
+                await message.replyMessage([Structs.image(img), Structs.text('收录成功')])
             } else {
-                message.replyMessage('收录失败')
+                await message.replyMessage('收录失败')
             }
 
             return
@@ -129,13 +129,13 @@ bot.addPlugin({
         }
 
         //语录
-        if (message.commandCheck('语录')){
+        if (message.commandCheck('语录')) {
             let arg = message.commandGetArgs('语录')
             const data = read(bot.getPluginDataPath(this))
             if (!data) return
 
             //发送语录
-            if (!arg){
+            if (!arg) {
                 if (!timeCheck()) return
 
                 const chat = helper.math.randomArrayOnce(data)
@@ -144,7 +144,7 @@ bot.addPlugin({
             }
 
             //指定语录
-            if (typeof arg === 'string'){
+            if (typeof arg === 'string') {
                 const filteredData = data.filter(value => {
                     const yulu = value.yulu
                     return yulu.some(yuluElement =>
@@ -164,7 +164,7 @@ bot.addPlugin({
 
             //@某人的专属语录
             if (arg[0].type === 'at') {
-                let id =arg[0].data.qq
+                let id = arg[0].data.qq
                 if (id === 'all') {
                     const chat = helper.math.randomArrayOnce(data)
                     await send(chat)
