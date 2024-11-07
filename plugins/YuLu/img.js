@@ -37,7 +37,6 @@ export async function createImg (yulu, nickName, headImg, groupId, bot) {
             let height = targetHeight + fontSize
             canvasHeight += height
         }
-        canvasHeight -= fontSize
     }
     if (canvasHeight < headSize + spacing * 2) {    //最小值
         canvasHeight = headSize + spacing * 2
@@ -72,8 +71,7 @@ export async function createImg (yulu, nickName, headImg, groupId, bot) {
     if (text !== '') {
         textY += fontSize
         ctx.fillStyle = color
-        ctx.fillText(text, textX, textY)
-
+        ctx.fillText(text.replace(/\n{3,}/g, '\n\n'), textX, textY)
         textY = spacing + fontSize * (re.lineCount + 1)
     }
 
@@ -90,7 +88,7 @@ export async function createImg (yulu, nickName, headImg, groupId, bot) {
     //绘制作者
     ctx.textAlign = 'right'
     textX = canvasWidth - spacing * 2
-    textY = textY + fontSize
+    textY = textY + fontSize * 2
     ctx.fillText(`—— ${nickName}`, textX, textY)
 
     return canvas.toBuffer('image/jpeg')
@@ -116,7 +114,7 @@ async function parseYulu (ctx, maxWidth, yulu, groupId, bot) {
                 }
                 break
             case 'image':
-                let img =  fs.readFileSync(`${globalState.dataImgPath}\\${element.data.file}`)
+                let img = fs.readFileSync(`${globalState.dataImgPath}\\${element.data.file}`)
                 if (img) imgs.push(await loadImage(img))
                 break
             default:
