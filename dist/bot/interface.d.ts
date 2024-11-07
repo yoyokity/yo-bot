@@ -25,6 +25,10 @@ export interface PluginInterface {
         commandKey: string;
         help: string;
     }[];
+    /**
+     * 插件初始化
+     */
+    init: () => void;
     /** 监听message事件 */
     onMessage: (message: Message) => Promise<void>;
     /** 监听request事件 */

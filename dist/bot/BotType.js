@@ -119,6 +119,7 @@ export class Bot {
      */
     addPlugin(plugin) {
         this._plugins.set(plugin.name, plugin);
+        plugin.init();
         helper.logging.success(`已加载插件：${plugin.name}`);
     }
     async loadPlugin() {

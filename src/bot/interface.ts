@@ -24,6 +24,10 @@ export interface PluginInterface {
      * 一个指令对应一个{}，commandKey不需要写指令前缀
      */
     commandHelp: { commandKey: string, help: string }[]
+    /**
+     * 插件初始化
+     */
+    init: () => void
     /** 监听message事件 */
     onMessage: (message: Message) => Promise<void>
     /** 监听request事件 */

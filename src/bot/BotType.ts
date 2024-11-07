@@ -166,6 +166,7 @@ export class Bot {
      */
     public addPlugin (plugin: PluginInterface) {
         this._plugins.set(plugin.name, plugin)
+        plugin.init()
         helper.logging.success(`已加载插件：${plugin.name}`)
     }
 
