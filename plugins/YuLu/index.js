@@ -1,6 +1,5 @@
-import { Message } from '../../src/bot/MessageType.js'
-import { output } from './output.js'
-import { include } from './include.js'
+import { output } from './command/output.js'
+import { include } from './command/include.js'
 import { globalState } from './globalState.js'
 
 bot.addPlugin({

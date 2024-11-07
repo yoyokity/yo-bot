@@ -1,6 +1,5 @@
 import { send } from './output.js'
-import { Message } from '../../src/bot/MessageType.js'
-import { globalState } from './globalState.js'
+import { globalState } from '../globalState.js'
 import * as fs from 'node:fs'
 
 function parseAt (message) {
@@ -51,10 +50,8 @@ export async function include (message) {
         let sender1 = content[0].user_id
         var yulu = []
         for (const v of content) {
-            /** @type {Message} */
-            let m = new Message(v)
-            if (m.senderId !== sender1) continue
-            yulu.push(...m.message.filter((value, index, array) => {
+            if (v.user_id !== sender1) continue
+            yulu.push(...v.message.filter((value, index, array) => {
                 return ['text', 'at'].includes(value.type)
             }))
         }

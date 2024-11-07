@@ -1,6 +1,6 @@
 import { Structs } from 'node-napcat-ts'
-import { createImg } from './img.js'
-import { globalState } from './globalState.js'
+import { createImg } from '../img.js'
+import { globalState } from '../globalState.js'
 
 let nextTime = 0
 
