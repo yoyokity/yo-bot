@@ -73,6 +73,7 @@ export async function createImg (yulu, nickName, headImg, groupId, bot) {
 
 async function parseYulu (ctx, maxWidth, yulu, groupId, bot) {
     let text = ''
+    let imgs =[]
     for (let element of yulu) {
         switch (element.type) {
             case 'text':
@@ -87,6 +88,9 @@ async function parseYulu (ctx, maxWidth, yulu, groupId, bot) {
                     let nick = re.card || re.nickname
                     text += `@${nick} `
                 }
+                break
+            case 'image':
+                imgs.push(element.data.url)
                 break
             default:
                 break

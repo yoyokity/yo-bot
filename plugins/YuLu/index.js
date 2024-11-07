@@ -32,7 +32,7 @@ bot.addPlugin({
      */
     commandHelp: [{
         commandKey: '收录',
-        help: '在目标消息下回复即可收录，收录多条可以在转发消息下回复'
+        help: '引用目标消息即可收录，收录多条时引用转发消息并艾特语录者'
     }, {
         commandKey: '语录',
         help: '随机发送一条语录'
@@ -51,6 +51,7 @@ bot.addPlugin({
     async onMessage (message) {
         if (!message.isGroup) return
 
+        console.log(message)
         //收录
         if (message.replyId && message.commandCheck('收录')) {
             //获取消息
@@ -61,34 +62,51 @@ bot.addPlugin({
             }
 
             //解析消息并储存
-            let qqId = replyMessage.senderId
-            if (replyMessage.message[0].type === 'forward') {
-                //多条转发
-                const content = replyMessage.message[0].data['content']
-                const sender = content[0].user_id
-
-                // 过滤并处理消息内容的函数
-                const filterMessages = (messages) => {
-                    return messages
-                        .filter(v => v.senderId === sender)
-                        .flatMap(v => {
-                            /** @type {Message} */
-                            const m = new Message(v)
-                            return m.message.filter(item => ['text', 'at'].includes(item.type))
-                        })
-                        .map(value => {
-                            if (value.type === 'text') {
-                                value.data.text = value.data.text.trim() + '\n\n'
-                            }
-                            return value
-                        })
+            if (replyMessage.message[0].type === 'forward'){
+                //转发多条
+                
+                //获取语录者
+                let args = message.commandGetArgs('收录')
+                var qqId =0
+                for (let arg of args) {
+                    if (arg.type !== 'at' ) continue
+                    if (arg.data['qq'] === String(message.botId)) continue
+                    if (arg.data['qq'] === 'all') continue
+                    qqId = Number(arg.data['qq'])
+                    break
                 }
-
-                var yulu = filterMessages(content)
-            } else {
+                
+                if (!qqId){
+                    message.replyMessage('收录多条时请@语录者')
+                    return
+                }
+                
+                let content = replyMessage.message[0].data['content']
+                let sender1 = content[0].user_id
+                var yulu = []
+                for (const v of content) {
+                    /** @type {Message} */
+                    let m = new Message(v)
+                    if (m.senderId !== sender1) continue
+                    yulu.push(...m.message.filter((value, index, array) => {
+                        return ['text', 'at'].includes(value.type)
+                    }))
+                }
+                yulu.forEach((value, index, array)=>{
+                    if (value.type === 'text'){
+                        value.data.text = value.data.text.trim()+'\n\n'
+                    }
+                })
+                
+            }else {
                 //单条
-                var yulu = replyMessage.message.filter(value => ['text', 'at'].includes(value.type))
+                var qqId = replyMessage.senderId
+                var yulu = replyMessage.message.filter((value, index, array) => {
+                    return ['text', 'at'].includes(value.type)
+                })
             }
+            
+            if (yulu.length === 0) return
 
             let jsonPath = `${bot.getPluginDataPath(this)}/${message.groupId}.json`
             /** @type {{}[]} */
