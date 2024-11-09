@@ -23,8 +23,18 @@ export async function output (message) {
     /**
      * @return {{}[]|null}
      */
-    function read (pluginDataPath) {
-        let data = helper.json.read(`${pluginDataPath}/${message.groupId}.json`)
+    function read (pluginDataPath, all = false) {
+        if (all) {
+            let groups = globalState.publicGroups
+            var data = []
+            for (let group of groups) {
+                if (group === message.groupId) continue
+                let _data = helper.json.read(`${pluginDataPath}/${group}.json`)
+                data.push(..._data)
+            }
+        } else {
+            var data = helper.json.read(`${pluginDataPath}/${message.groupId}.json`)
+        }
         if (!data) {
             message.replyMessage('未收录任何语录')
             return null
@@ -33,9 +43,9 @@ export async function output (message) {
     }
 
     let arg = message.commandGetArgs('语录')
-    const data = read(globalState.dataPath)
-    if (!data) return
-
+    let data = read(globalState.dataPath)
+    if (!data && !globalState.publicGroups.includes(message.groupId)) return
+    
     //发送语录
     if (!arg) {
         if (!timeCheck()) return
@@ -71,6 +81,10 @@ export async function output (message) {
             const chat = helper.math.randomArrayOnce(data)
             await send(chat, message)
             return
+        }
+
+        if (globalState.publicGroups.includes(message.groupId)) {
+            data = read(globalState.dataPath,true)
         }
 
         const filteredData = data.filter(value => value.qqId === Number(id))

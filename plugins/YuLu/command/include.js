@@ -32,6 +32,10 @@ async function downloadImg (url, fileName) {
  */
 export async function include (message) {
     //获取消息
+    if (!message.replyId) {
+        await message.replyMessage('获取不到想要收录的消息')
+        return
+    }
     let replyMessage = await bot.Api.getMessage(message.replyId)
     if (!replyMessage) {
         await message.replyMessage('获取不到想要收录的消息')
@@ -97,6 +101,7 @@ export async function include (message) {
     }
 
     if (yulu.length === 0) return
+    if (yulu.length === 1 && yulu[0].type === 'text' && yulu[0].data.text === '') return
 
     //写入json
     let jsonPath = `${globalState.dataPath}/${message.groupId}.json`
