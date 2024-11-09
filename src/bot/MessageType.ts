@@ -94,6 +94,13 @@ export class Message {
     }
 
     /**
+     * 消息发送者的群权限
+     */
+    get senderRole (): 'owner' | 'admin' | 'member' {
+        return this.sender?.role || 'member'
+    }
+
+    /**
      * 是否为群组消息
      */
     get isGroup (): boolean {
@@ -215,15 +222,22 @@ export class Message {
      */
     public commandGetArgs (command: string | [string]): string | Receive[keyof Receive][] | null {
         if (typeof command === 'string') command = [command]
+
         let outArgs: Receive[keyof Receive][] = []
         this.message.forEach((value, index, array) => {
             if (value.type !== 'text') return
             let text = value.data.text
             let sp = ''
-            if (command.some((value) => {
-                sp = value
-                return text.includes(value)
-            })) {
+
+            bot.prefix.some((prefix: string) => command.some(cmd => {
+                if (text.includes(prefix + cmd)) {
+                    sp = prefix + cmd
+                    return true
+                }
+                return false
+            }))
+
+            if (sp !== '') {
                 let end = text.split(sp)[1]
                 if (end.trim() !== '') {
                     outArgs.push(Structs.text(end))

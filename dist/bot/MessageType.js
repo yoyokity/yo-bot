@@ -71,6 +71,12 @@ export class Message {
         return this.sender?.card || '';
     }
     /**
+     * 消息发送者的群权限
+     */
+    get senderRole() {
+        return this.sender?.role || 'member';
+    }
+    /**
      * 是否为群组消息
      */
     get isGroup() {
@@ -201,10 +207,14 @@ export class Message {
                 return;
             let text = value.data.text;
             let sp = '';
-            if (command.some((value) => {
-                sp = value;
-                return text.includes(value);
-            })) {
+            bot.prefix.some((prefix) => command.some(cmd => {
+                if (text.includes(prefix + cmd)) {
+                    sp = prefix + cmd;
+                    return true;
+                }
+                return false;
+            }));
+            if (sp !== '') {
                 let end = text.split(sp)[1];
                 if (end.trim() !== '') {
                     outArgs.push(Structs.text(end));

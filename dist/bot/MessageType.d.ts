@@ -43,6 +43,10 @@ export declare class Message {
      */
     get senderCard(): string;
     /**
+     * 消息发送者的群权限
+     */
+    get senderRole(): 'owner' | 'admin' | 'member';
+    /**
      * 是否为群组消息
      */
     get isGroup(): boolean;
