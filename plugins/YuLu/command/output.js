@@ -45,7 +45,7 @@ export async function output (message) {
     let arg = message.commandGetArgs('语录')
     let data = read(globalState.dataPath)
     if (!data && !globalState.publicGroups.includes(message.groupId)) return
-    
+
     //发送语录
     if (!arg) {
         if (!timeCheck()) return
@@ -84,7 +84,7 @@ export async function output (message) {
         }
 
         if (globalState.publicGroups.includes(message.groupId)) {
-            data = read(globalState.dataPath,true)
+            data = read(globalState.dataPath, true)
         }
 
         const filteredData = data.filter(value => value.qqId === Number(id))
@@ -100,14 +100,16 @@ export async function output (message) {
 export async function send (chat, message, text = '') {
     let yulu = chat.yulu
     let qqId = chat.qqId
+    let replyId = chat.replyId
+    let messageId = 0
 
     if (yulu.length === 1 && yulu[0].type === 'image') {
         //单张图片
         let img = `${globalState.dataImgPath}/${yulu[0].data.file}`
         if (text === '') {
-            await message.replyMessage([Structs.image(img)])
+            messageId = await message.replyMessage([Structs.image(img)])
         } else {
-            await message.replyMessage([Structs.image(img), Structs.text(text)])
+            messageId = await message.replyMessage([Structs.image(img), Structs.text(text)])
         }
     } else {
         //正常语录
@@ -117,9 +119,12 @@ export async function send (chat, message, text = '') {
 
         let img = await createImg(yulu, nickName, headImg, message.groupId, bot)
         if (text === '') {
-            await message.replyMessage([Structs.image(img)])
+            messageId = await message.replyMessage([Structs.image(img)])
         } else {
-            await message.replyMessage([Structs.image(img), Structs.text(text)])
+            messageId = await message.replyMessage([Structs.image(img), Structs.text(text)])
         }
     }
+
+    globalState.sendHistory[messageId] = replyId
+    globalState.saveSendHistory()
 }

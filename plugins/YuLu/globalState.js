@@ -3,6 +3,7 @@ class GlobalState {
     #dataImgPath
 
     publicGroups = []
+    sendHistory = {}
 
     init (dataPath) {
         //创建data目录
@@ -11,19 +12,35 @@ class GlobalState {
         this.#dataImgPath = p.str
         helper.path.createPath(p.str)
 
+        helper.path.createPath(helper.path.new(dataPath).join('config').str)
+
         //获取publicGroups
         let publicGroups = helper.json.read(this.#publicGroupsPath)
         if (publicGroups) this.publicGroups = publicGroups
+
+        //获取sendHistory
+        let sendHistory = helper.json.read(this.#sendHistoryPath)
+        if (sendHistory) this.sendHistory = sendHistory
     }
 
+    //
     savePublicGroups () {
         helper.json.write(this.#publicGroupsPath, this.publicGroups)
     }
 
-    get #publicGroupsPath () {
-        return helper.path.new(this.#dataPath).join('publicGroups.json').str
+    saveSendHistory () {
+        helper.json.write(this.#sendHistoryPath, this.sendHistory)
     }
 
+    get #publicGroupsPath () {
+        return helper.path.new(this.#dataPath).join('config/publicGroups.json').str
+    }
+
+    get #sendHistoryPath () {
+        return helper.path.new(this.#dataPath).join('config/sendHistory.json').str
+    }
+
+    //
     get dataPath () {
         return this.#dataPath
     }

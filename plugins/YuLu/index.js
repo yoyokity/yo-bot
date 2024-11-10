@@ -2,6 +2,7 @@ import { output } from './command/output.js'
 import { include } from './command/include.js'
 import { globalState } from './globalState.js'
 import { admin } from './command/admin.js'
+import { del } from './command/delete.js'
 
 bot.addPlugin({
     name: '语录',
@@ -21,6 +22,9 @@ bot.addPlugin({
         commandKey: '语录 xx',
         help: '随机发送一条指定文本的语录'
     }, {
+        commandKey: '删除语录',
+        help: '(仅限群主) 引用bot的语录消息即可删除目标语录'
+    }, {
         commandKey: '开放语录',
         help: '(仅限群主) 开关本群权限，指定对象发送语录时可获取其在别的群的语录，开启后本群语录也将流出'
     }],
@@ -30,10 +34,14 @@ bot.addPlugin({
     },
     async onMessage (message) {
         if (!message.isGroup) return
-        
+
         //管理员指令
         if (message.commandCheck('开放语录')) {
             await admin(message)
+            return
+        }
+        if (message.commandCheck('删除语录')) {
+            await del(message)
             return
         }
 
